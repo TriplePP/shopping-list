@@ -17,9 +17,16 @@ const getSavedItems = () => {
 };
 
 const ShoppingList = () => {
-  const [itemList, setItemList] = useState<Item[]>(getSavedItems());
+  const savedItems = getSavedItems();
+  const [itemList, setItemList] = useState<Item[]>(savedItems);
   const [name, setName] = useState("");
   const [price, setPrice] = useState<number | "">("");
+  // calculate our total from saved shopping list
+  const [total, setTotal] = useState<number>(
+    savedItems.reduce((sum: number, item: Item) => sum + item.price, 0)
+  );
+  // hard coding the spending limit here - but we could take this as another input from the user
+  const spendingLimit = 10;
 
   // save our shopping list to local storage when it is updated
   useEffect(() => {
@@ -41,17 +48,25 @@ const ShoppingList = () => {
     };
     // creating a copy of the list here to avoid any state issues with editing the current list
     const updatedItems = [...itemList, newItem];
+    const newTotal = total + price;
     setItemList(updatedItems);
-
+    setTotal(newTotal);
+    if (newTotal > spendingLimit)
+      alert(
+        "You have gone over your spending limit! Consider removing some items"
+      );
     // Clear the input fields after adding the item
     setName("");
     setPrice("");
   };
 
   const handleRemoveItem = (index: number) => {
+    const amountToRemoveFromTotal = itemList[index].price;
+    const newTotal = total - amountToRemoveFromTotal;
     // filtering all our items for one that matches the index of the clicked button
     const updatedItems = itemList.filter((_, i) => i !== index);
     setItemList(updatedItems);
+    setTotal(newTotal);
   };
 
   const toggleSelected = (index: number) => {
@@ -80,6 +95,7 @@ const ShoppingList = () => {
 
   return (
     <div className="list-container">
+      <h2>Your spending limit is: £{spendingLimit.toFixed(2)}</h2>
       <form className="add-item-container" onSubmit={handleAddItem}>
         <label>
           Name
@@ -128,6 +144,7 @@ const ShoppingList = () => {
           </li>
         ))}
       </ul>
+      <div>Total: £{total.toFixed(2)} </div>
     </div>
   );
 };
