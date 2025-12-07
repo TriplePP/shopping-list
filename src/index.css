@@ -74,3 +74,31 @@ div {
   margin-bottom: 8px;
   background: #fafafa;
 }
+
+.tick-icon {
+  color: #28a745;
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tick-icon:hover {
+  color: #218838;
+  transform: scale(1.1);
+}
+
+.arrow-icon {
+  color: #007bff;
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0 4px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.arrow-icon:hover {
+  color: #0056b3;
+  transform: scale(1.2);
+}

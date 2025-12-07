@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface Item {
   name: string;
@@ -6,10 +6,25 @@ interface Item {
   selected: boolean;
 }
 
+// load shopping list from local storage if present
+const getSavedItems = () => {
+  const savedItems = localStorage.getItem("shoppingList");
+  if (savedItems) {
+    return JSON.parse(savedItems);
+  } else {
+    return [];
+  }
+};
+
 const ShoppingList = () => {
-  const [itemList, setItemList] = useState<Item[]>([]);
+  const [itemList, setItemList] = useState<Item[]>(getSavedItems());
   const [name, setName] = useState("");
   const [price, setPrice] = useState<number | "">("");
+
+  // save our shopping list to local storage when it is updated
+  useEffect(() => {
+    localStorage.setItem("shoppingList", JSON.stringify(itemList));
+  }, [itemList]);
 
   const handleAddItem = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +51,30 @@ const ShoppingList = () => {
   const handleRemoveItem = (index: number) => {
     // filtering all our items for one that matches the index of the clicked button
     const updatedItems = itemList.filter((_, i) => i !== index);
+    setItemList(updatedItems);
+  };
+
+  const toggleSelected = (index: number) => {
+    const updatedItems = [...itemList];
+    updatedItems[index].selected = !updatedItems[index].selected;
+    setItemList(updatedItems);
+  };
+
+  const moveItemUp = (index: number) => {
+    if (index === 0) return;
+    const updatedItems = [...itemList];
+    const before = updatedItems[index - 1];
+    updatedItems[index - 1] = updatedItems[index];
+    updatedItems[index] = before;
+    setItemList(updatedItems);
+  };
+
+  const moveItemDown = (index: number) => {
+    if (index === itemList.length - 1) return;
+    const updatedItems = [...itemList];
+    const next = updatedItems[index + 1];
+    updatedItems[index + 1] = updatedItems[index];
+    updatedItems[index] = next;
     setItemList(updatedItems);
   };
 
@@ -66,9 +105,26 @@ const ShoppingList = () => {
       </form>
       <ul className="item-list">
         {itemList.map((item, index) => (
-          <li className="item-container" key={index}>
-            {item.name} - {item.price.toFixed(2)}
-            <button onClick={() => handleRemoveItem(index)}>Remove Item</button>
+          <li className={"item-container"} key={index}>
+            <span
+              style={{
+                textDecoration: item.selected ? "line-through" : "none",
+                color: item.selected ? "grey" : "black",
+              }}
+            >
+              {item.name}
+            </span>{" "}
+            £{item.price.toFixed(2)}
+            <span onClick={() => moveItemUp(index)} className="arrow-icon">
+              ↑
+            </span>
+            <span onClick={() => moveItemDown(index)} className="arrow-icon">
+              ↓
+            </span>
+            <span onClick={() => toggleSelected(index)} className="tick-icon">
+              ✓
+            </span>
+            <button onClick={() => handleRemoveItem(index)}>Remove</button>
           </li>
         ))}
       </ul>
