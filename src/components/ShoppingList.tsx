@@ -131,10 +131,18 @@ const ShoppingList = () => {
               {item.name}
             </span>{" "}
             £{item.price.toFixed(2)}
-            <span onClick={() => moveItemUp(index)} className="arrow-icon">
+            <span
+              onClick={() => moveItemUp(index)}
+              className="arrow-icon"
+              data-testid="up-arrow"
+            >
               ↑
             </span>
-            <span onClick={() => moveItemDown(index)} className="arrow-icon">
+            <span
+              onClick={() => moveItemDown(index)}
+              className="arrow-icon"
+              data-testid="down-arrow"
+            >
               ↓
             </span>
             <span onClick={() => toggleSelected(index)} className="tick-icon">
