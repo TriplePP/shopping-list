@@ -93,6 +93,43 @@ const ShoppingList = () => {
     setItemList(updatedItems);
   };
 
+  const handleEmailList = () => {
+    // convert shopping list to text
+    const emailBody = createShoppingListForEmail();
+
+    // encode shopping list and create mailto link
+    const subject = encodeURIComponent("My Shopping List");
+    const body = encodeURIComponent(emailBody);
+    const mailToLink = `mailto:?subject=${subject}&body=${body}`;
+
+    // open email to box
+    window.location.href = mailToLink;
+  };
+
+  const createShoppingListForEmail = () => {
+    let emailText = "My Shopping List\n\n";
+
+    // Add each item to our email
+    itemList.forEach((item) => {
+      emailText += `- ${item.name}: £${item.price.toFixed(2)}`;
+      if (item.selected) {
+        emailText += "✓";
+      }
+      emailText += "\n";
+    });
+
+    // Add totals
+    emailText += `\nTotal: £${total.toFixed(2)}`;
+    emailText += `\nSpending Limit: £${spendingLimit.toFixed(2)}`;
+
+    // Add warning if over budget
+    if (total > spendingLimit) {
+      emailText += "\n\n YOU ARE CURRENTLY OVER BUDGET";
+    }
+
+    return emailText;
+  };
+
   return (
     <div className="list-container">
       <h2>Your spending limit is: £{spendingLimit.toFixed(2)}</h2>
@@ -153,6 +190,13 @@ const ShoppingList = () => {
         ))}
       </ul>
       <div>Total: £{total.toFixed(2)} </div>
+      <button
+        className="email-button"
+        onClick={handleEmailList}
+        disabled={itemList.length === 0}
+      >
+        Email my shopping list
+      </button>
     </div>
   );
 };

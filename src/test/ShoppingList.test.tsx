@@ -97,6 +97,59 @@ describe("ShoppingList component", () => {
   });
 });
 
+describe("Email functionality", () => {
+  beforeEach(() => {
+    render(<ShoppingList />);
+  });
+
+  afterEach(() => {
+    cleanup();
+    localStorage.clear();
+    vi.restoreAllMocks();
+  });
+
+  it("renders the email button", () => {
+    expect(screen.getByText("Email my shopping list")).toBeInTheDocument();
+  });
+
+  it("disables email button when list is empty", () => {
+    const emailButton = screen.getByRole("button", {
+      name: "Email my shopping list",
+    });
+    expect(emailButton).toBeDisabled();
+  });
+
+  it("enables email button when list has items", () => {
+    givenValidInputIsEntered();
+    givenAddItemButtonIsClicked();
+
+    const emailButton = screen.getByRole("button", {
+      name: "Email my shopping list",
+    });
+    expect(emailButton).toBeEnabled();
+  });
+
+  it("creates correct mailto link", () => {
+    givenMockWindowLocationHrefIsCreated();
+    givenValidInputIsEntered();
+    givenAddItemButtonIsClicked();
+    givenEmailButtonIsClicked();
+
+    expect(window.location.href).toContain("mailto:");
+  });
+
+  it("adds items to email body", () => {
+    givenMockWindowLocationHrefIsCreated();
+    givenValidInputIsEntered();
+    givenAddItemButtonIsClicked();
+    givenEmailButtonIsClicked();
+
+    const emailBody = decodeURIComponent(window.location.href);
+    expect(emailBody).toContain("Coffee");
+    expect(emailBody).toContain("£2.00");
+  });
+});
+
 function givenValidInputIsEntered() {
   const nameInput = screen.getByLabelText("Name");
   const priceInput = screen.getByLabelText("Price");
@@ -135,4 +188,18 @@ function givenAddItemButtonIsClicked() {
 function givenItemRemoveButtonIsClicked() {
   const button = screen.getByRole("button", { name: "Remove" });
   fireEvent.click(button);
+}
+
+function givenEmailButtonIsClicked() {
+  const emailButton = screen.getByRole("button", {
+    name: "Email my shopping list",
+  });
+  fireEvent.click(emailButton);
+}
+
+function givenMockWindowLocationHrefIsCreated() {
+  // we need to delete the window location object for our test as it is read only
+  delete (window as any).location;
+  // we create a new window.location.href and set to an empty string
+  window.location = { href: "" } as any;
 }
